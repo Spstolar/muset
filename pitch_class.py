@@ -1,11 +1,16 @@
+from itertools import combinations
+import math
+
+
 N_PITCHES = 12
 
 class PitchClass:
     def __init__(self, pitches) -> None:
         # TODO: type check that pitches was a collection of integers
         self.pitches = self.clean_pitch_set(pitches)
-        # TODO: will have to re-calc if this changes
+        # TODO: will have to re-calc these if the pitches change
         self.num_pitches = len(self.pitches)
+        self.interval_vector = self.compute_interval_vector()
 
     def clean_pitch_set(self, pitches):
         return sorted(list(set(pitches)))
@@ -45,11 +50,30 @@ class PitchClass:
             candidate_index = intervals.index(most_left_scrunched)
             self.pitches = min_width_candidates[candidate_index]
 
+    def compute_interval_vector(self):
+        interval_dict = {i: 0 for i in range(1, 7)}
+        for p1, p2 in combinations(self.pitches, 2):
+            interval = (p1 - p2) % N_PITCHES
+            # TODO: generalize this (assumes N_PITCHES = 12)
+            # The function is f(x) = 6 - |x - 6|
+            mid = 6
+            dist_from_mid = math.fabs(interval - mid)
+            interval = mid - dist_from_mid
+            # because the pitch class was cleaned, we know it has to be 1-6
+            interval_dict[interval] += 1
+        return list(interval_dict.values())
+
+        
+
 
 if __name__ == "__main__":
-    pc = PitchClass([0, 5, 7, 8])
+    example = [0, 5, 7, 8]
+    print(f"Example: {example}")
+    pc = PitchClass(example)
     print(pc)
+    # TODO: write some tests for the normal form
     print("normal form")
     pc.normalize()
     print(pc)
-    # TODO: write some tests for the normal form
+    # TODO: interval vector tests, also how do we want to format this object
+    print(pc.interval_vector)
